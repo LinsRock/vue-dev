@@ -82,18 +82,21 @@ export function parse (
 ): ASTElement | void {
   warn = options.warn || baseWarn
 
+  // 选项预处理
   platformIsPreTag = options.isPreTag || no
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
   const isReservedTag = options.isReservedTag || no
   maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
+  // 扩展
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
 
   delimiters = options.delimiters
 
+  // 解析核心
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
@@ -116,6 +119,7 @@ export function parse (
       element = processElement(element, options)
     }
     // tree management
+    // 如果栈没有清空
     if (!stack.length && element !== root) {
       // allow root elements with v-if, v-else-if and v-else
       if (root.if && (element.elseif || element.else)) {
@@ -201,6 +205,7 @@ export function parse (
     }
   }
 
+  // 解析html
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -210,6 +215,7 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+    // 开始标签
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -221,6 +227,7 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
+      // 创建节点的AST
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
@@ -277,11 +284,13 @@ export function parse (
         processRawAttrs(element)
       } else if (!element.processed) {
         // structural directives
+        // 处理结构性指令 v-for/v-if/v-once
         processFor(element)
         processIf(element)
         processOnce(element)
       }
 
+      // 根节点进入
       if (!root) {
         root = element
         if (process.env.NODE_ENV !== 'production') {
@@ -291,13 +300,16 @@ export function parse (
 
       if (!unary) {
         currentParent = element
+        // 入栈
         stack.push(element)
       } else {
         closeElement(element)
       }
     },
 
+    // 结束标签
     end (tag, start, end) {
+      // 出栈
       const element = stack[stack.length - 1]
       // pop stack
       stack.length -= 1
@@ -308,6 +320,7 @@ export function parse (
       closeElement(element)
     },
 
+    // 字符
     chars (text: string, start: number, end: number) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
@@ -379,6 +392,8 @@ export function parse (
         }
       }
     },
+
+    // 注释
     comment (text: string, start, end) {
       // adding anyting as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored
@@ -396,6 +411,8 @@ export function parse (
       }
     }
   })
+
+  // 返回整个转换后的AST树
   return root
 }
 

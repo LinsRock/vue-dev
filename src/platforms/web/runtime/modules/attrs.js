@@ -36,6 +36,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   for (key in attrs) {
+    // 属性对比
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {

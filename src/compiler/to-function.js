@@ -11,6 +11,7 @@ type CompiledFunctionResult = {
 
 function createFunction (code, errors) {
   try {
+    // 将字符串转换为渲染函数的原理
     return new Function(code)
   } catch (err) {
     errors.push({ err, code })
@@ -57,6 +58,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // compile
+    // 得到渲染函数字符串
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -88,6 +90,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // turn code into functions
+    // 将字符串转换成渲染函数
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)

@@ -72,6 +72,7 @@ export default class VNode {
 }
 
 export const createEmptyVNode = (text: string = '') => {
+  // 创建一个空的虚拟dom
   const node = new VNode()
   node.text = text
   node.isComment = true

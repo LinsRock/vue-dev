@@ -80,6 +80,7 @@ function add (
       }
     }
   }
+  // 原生元素绑定事件方式
   target.addEventListener(
     name,
     handler,
@@ -106,6 +107,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
     return
   }
+  // 取出绑定的事件
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
   target = vnode.elm

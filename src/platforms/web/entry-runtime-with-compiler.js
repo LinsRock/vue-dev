@@ -14,7 +14,9 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 先保存原型中的$mount方法
 const mount = Vue.prototype.$mount
+// 给web平台扩展核心的$mount函数
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -31,6 +33,7 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // render()、template和el的优先级 render() > template > el
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -56,12 +59,15 @@ Vue.prototype.$mount = function (
     } else if (el) {
       template = getOuterHTML(el)
     }
+
+    // 获取到template后最终都是转换成reander函数
     if (template) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
 
+      // 转换为render函数
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -69,6 +75,7 @@ Vue.prototype.$mount = function (
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
+      // 在vue实例选项上挂载render
       options.render = render
       options.staticRenderFns = staticRenderFns
 
@@ -79,6 +86,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 最终还是执行了核心的$mount函数
   return mount.call(this, el, hydrating)
 }
 

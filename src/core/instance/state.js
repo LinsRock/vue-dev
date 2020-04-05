@@ -48,14 +48,23 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
+  // props初始化
   if (opts.props) initProps(vm, opts.props)
+  // methods初始化
   if (opts.methods) initMethods(vm, opts.methods)
+
+  // data初始化（数据响应式开始）
   if (opts.data) {
+    // data如果存在，对data响应化
     initData(vm)
   } else {
+    // data如果不存在，传入一个空对象开始响应化
     observe(vm._data = {}, true /* asRootData */)
   }
+
+  // 初始化computed
   if (opts.computed) initComputed(vm, opts.computed)
+  // 初始化watch
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
@@ -111,9 +120,12 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  // 判断data是一个函数还是一个对象，并取出函数中的data对象
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+
+
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -127,6 +139,7 @@ function initData (vm: Component) {
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
+  // 判断data中的属性命名是否和props、methods中有重名
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
@@ -144,6 +157,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 将data中的属性代理到vm上，实现可直接在vm上访问data的属性
       proxy(vm, `_data`, key)
     }
   }
@@ -184,6 +198,7 @@ function initComputed (vm: Component, computed: Object) {
 
     if (!isSSR) {
       // create internal watcher for the computed property.
+      // 创建一个Watcher去监听component，一个计算属性对应一个Watcher
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -336,12 +351,15 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+  // 添加$data和$props的引用，指向的是_data和_props，但是只可读，不能修改
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  // 实现$set和$delete
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  // 实现$watch
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -353,14 +371,18 @@ export function stateMixin (Vue: Class<Component>) {
     }
     options = options || {}
     options.user = true
+    // 创建一个Watcher对监听
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
+      // 立即执行，马上执行一次，并传入watcher.value为参数
       try {
         cb.call(vm, watcher.value)
       } catch (error) {
         handleError(error, vm, `callback for immediate watcher "${watcher.expression}"`)
       }
     }
+
+    // 返回停止监听函数
     return function unwatchFn () {
       watcher.teardown()
     }

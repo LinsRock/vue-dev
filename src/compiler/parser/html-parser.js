@@ -64,7 +64,7 @@ export function parseHTML (html, options) {
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
-        // Comment:
+        // Comment: 匹配注释
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
@@ -78,6 +78,7 @@ export function parseHTML (html, options) {
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        // 匹配条件注释
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
@@ -88,6 +89,7 @@ export function parseHTML (html, options) {
         }
 
         // Doctype:
+        // 匹配<!DOCTYPE>标签
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           advance(doctypeMatch[0].length)
@@ -95,6 +97,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
+        // 匹配闭合的右标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -104,6 +107,7 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
+        // 匹配闭合的左标签
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -184,6 +188,7 @@ export function parseHTML (html, options) {
     html = html.substring(n)
   }
 
+  // 解析开始的标签
   function parseStartTag () {
     const start = html.match(startTagOpen)
     if (start) {
@@ -204,6 +209,7 @@ export function parseHTML (html, options) {
         match.unarySlash = end[1]
         advance(end[0].length)
         match.end = index
+        // 返回描述节点的match对象
         return match
       }
     }
@@ -248,6 +254,7 @@ export function parseHTML (html, options) {
     }
 
     if (options.start) {
+      // 执行start方法
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }

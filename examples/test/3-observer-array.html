@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <ul>
+      <li v-for="(item, index) in foo" :key="index">
+        {{ item }}
+      </li>
+    </ul>
+  </div>
+  
+  <script src="../../dist/vue.js"></script>
+  <script>
+
+    /* 测试响应式数据原理 */
+    const vm = new Vue({
+      el: '#app',
+      data: {
+        foo: ['leo']
+      }
+    })
+
+    setTimeout(() => {
+      vm.foo.push('tom')
+    }, 1500);
+  </script>
+</body>
+</html>

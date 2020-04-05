@@ -14,8 +14,8 @@ import { isUnaryTag, canBeLeftOpenTag } from './util'
 
 export const baseOptions: CompilerOptions = {
   expectHTML: true,
-  modules,
-  directives,
+  modules, // class、style、model
+  directives, // 默认指令 v-html、v-text、v-model
   isPreTag,
   isUnaryTag,
   mustUseProp,

@@ -44,6 +44,7 @@ export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
 ): CodegenResult {
+  // 生成一个codeGenState实例
   const state = new CodegenState(options)
   const code = ast ? genElement(ast, state) : '_c("div")'
   return {
@@ -58,29 +59,43 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   }
 
   if (el.staticRoot && !el.staticProcessed) {
+    // 处理静态节点
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
+    // 处理once属性，v-once
     return genOnce(el, state)
   } else if (el.for && !el.forProcessed) {
+    // 处理for属性，v-for
     return genFor(el, state)
   } else if (el.if && !el.ifProcessed) {
+    // 处理if属性，v-if
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
+    // 处理template标签
     return genChildren(el, state) || 'void 0'
   } else if (el.tag === 'slot') {
+    // 处理插槽
     return genSlot(el, state)
   } else {
     // component or element
+    // 处理组件 或 原生元素
     let code
+
     if (el.component) {
+      // 组件处理
       code = genComponent(el.component, el, state)
     } else {
+      // 原生元素处理
       let data
       if (!el.plain || (el.pre && state.maybeComponent(el))) {
+        // 获取节点属性对象
         data = genData(el, state)
       }
 
+      // 将AST子节点数组转换成render函数字符串数组
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
+
+      // 生成渲染函数字符串，_c 为createElement别名
       code = `_c('${el.tag}'${
         data ? `,${data}` : '' // data
       }${
@@ -501,7 +516,9 @@ function getNormalizationType (
 ): number {
   let res = 0
   for (let i = 0; i < children.length; i++) {
+    // 取出子节点数组的AST节点
     const el: ASTNode = children[i]
+    // 只处理元素节点
     if (el.type !== 1) {
       continue
     }
@@ -524,10 +541,13 @@ function needsNormalization (el: ASTElement): boolean {
 
 function genNode (node: ASTNode, state: CodegenState): string {
   if (node.type === 1) {
+    // 元素节点
     return genElement(node, state)
   } else if (node.type === 3 && node.isComment) {
+    // 注释 文本节点
     return genComment(node)
   } else {
+    // 非注释的文本节点
     return genText(node)
   }
 }

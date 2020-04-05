@@ -77,6 +77,7 @@ export default class Watcher {
       : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
+      // 将updateComponent函数赋值给getter
       this.getter = expOrFn
     } else {
       this.getter = parsePath(expOrFn)
@@ -90,6 +91,8 @@ export default class Watcher {
         )
       }
     }
+
+    // 实例化时马上触发一次get
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -99,10 +102,13 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
+    // 将当前watcher实例挂载到Dep.target
     pushTarget(this)
     let value
     const vm = this.vm
     try {
+      // 组件级的Watcher：执行updateComponent方法
+      // computed：执行计算函数
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -116,6 +122,7 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
+      // 
       popTarget()
       this.cleanupDeps()
     }
@@ -129,7 +136,9 @@ export default class Watcher {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
+      // 将dep实例添加到watcher实例上
       this.newDeps.push(dep)
+      // 将watcher实例添加到dep上
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }
@@ -168,6 +177,7 @@ export default class Watcher {
     } else if (this.sync) {
       this.run()
     } else {
+      // 同步执行更新
       queueWatcher(this)
     }
   }
@@ -178,6 +188,7 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
+      // 会触发updateComponent函数
       const value = this.get()
       if (
         value !== this.value ||

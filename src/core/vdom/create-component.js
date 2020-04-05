@@ -34,20 +34,26 @@ import {
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
+  // 组件init的钩子函数
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
       vnode.componentInstance &&
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
     ) {
+      // 处理keep-alive，如果未激活则激活
       // kept-alive components, treat as a patch
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 对组件构造函数实例化，创建组件实例VueComponent
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
+      // 调用VueComponent原型上的$mouont方法（扩展过的$mount)
+      // 得到render函数并挂载到options上
+      // 最终会执行render函数得到真实dom，并插入到父节点上
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -109,10 +115,12 @@ export function createComponent (
     return
   }
 
+  // 取出Vue
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
+    // 如果Ctor是一个对象，通过vue.extend将其转换成构造函数
     Ctor = baseCtor.extend(Ctor)
   }
 
@@ -126,6 +134,7 @@ export function createComponent (
   }
 
   // async component
+  // 处理异步组件
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
@@ -148,17 +157,21 @@ export function createComponent (
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
+  // 解析组件构造函数选项
   resolveConstructorOptions(Ctor)
 
   // transform component v-model data into props & events
   if (isDef(data.model)) {
+    // 处理v-model，data的attrs和on添加指定的prop和event
     transformModel(Ctor.options, data)
   }
 
   // extract props
+  // 将props从data中提取
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
+  // 函数式组件处理
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
@@ -183,10 +196,13 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 安装组件钩子，在data上加上hook属性，保存组件钩子函数
   installComponentHooks(data)
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
+
+  // 实例化一个Vnode
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
@@ -201,7 +217,7 @@ export function createComponent (
   if (__WEEX__ && isRecyclableComponent(vnode)) {
     return renderRecyclableComponentTemplate(vnode)
   }
-
+  
   return vnode
 }
 
@@ -220,11 +236,13 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // 对组件构造函数实例化，创建组件实例
   return new vnode.componentOptions.Ctor(options)
 }
 
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
+  // hooksToMerge：是组件默认的钩子列表[init, prepatch, insert, destroy]
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
     const existing = hooks[key]
@@ -248,13 +266,19 @@ function mergeHook (f1: any, f2: any): Function {
 // transform component v-model info (value and callback) into
 // prop and event handler respectively.
 function transformModel (options, data: any) {
+  // 设定了v-model默认的prop 和 event分别是value 和 input
+  // 用户可以通过设置组件的model选项修改prop 和 event
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'
+  // 添加prop
   ;(data.attrs || (data.attrs = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
   const existing = on[event]
   const callback = data.model.callback
+
+  // 添加event
   if (isDef(existing)) {
+    // 预防v-model的event又重复监听了该event，需要将两个event回调都追加到事件回调数组中
     if (
       Array.isArray(existing)
         ? existing.indexOf(callback) === -1

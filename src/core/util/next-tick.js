@@ -13,6 +13,7 @@ let pending = false
 function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)
+  // 遍历执行callbacks中的cb，并清空callbacks
   callbacks.length = 0
   for (let i = 0; i < copies.length; i++) {
     copies[i]()
@@ -87,6 +88,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
+    // 将cb包装一层push到callbacks中，主要是为了错误处理
     if (cb) {
       try {
         cb.call(ctx)

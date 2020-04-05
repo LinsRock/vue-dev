@@ -41,17 +41,23 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+    // 声明一个Dep实例（这里生成的Dep是关联整个对象的）
     this.dep = new Dep()
     this.vmCount = 0
+    // 给当前对象添加一个__ob__属性，值为当前Observer实例
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      // 数组响应式处理
       if (hasProto) {
+        // 替换数组的原型，arrayMethods是加了变更通知的数组原型
         protoAugment(value, arrayMethods)
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
+      // 对数组内部的对象和数组进行响应式处理
       this.observeArray(value)
     } else {
+      // 对象响应式处理
       this.walk(value)
     }
   }
@@ -63,6 +69,7 @@ export class Observer {
    */
   walk (obj: Object) {
     const keys = Object.keys(obj)
+    // 遍历对象的每个属性，对每个属性进行响应式处理
     for (let i = 0; i < keys.length; i++) {
       defineReactive(obj, keys[i])
     }
@@ -112,6 +119,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     return
   }
   let ob: Observer | void
+  // 如果传入的对象已经是响应式的，直接返回__ob__(__ob__其实就是Observer的实例)
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -121,11 +129,13 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 传入的不是响应式对象，实例化一个Observer
     ob = new Observer(value)
   }
   if (asRootData && ob) {
     ob.vmCount++
   }
+  // observe返回一个Observer的实例对象
   return ob
 }
 
@@ -139,6 +149,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 实例化一个Dep类（这里的Dep实例是关联对象属性的，每个属性都有一个Dep）
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -153,17 +164,26 @@ export function defineReactive (
     val = obj[key]
   }
 
+  // 如果属性值是对象/数组，对其响应式处理，并返回一个ob实例
   let childOb = !shallow && observe(val)
+
+  // 数据拦截处理
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 取出要访问的值
       const value = getter ? getter.call(obj) : val
+      // Watcher实例化时触发，Dep.target为Watcher
       if (Dep.target) {
+        // 让当前Dep和Watcher实例形成多对多的对应关系
         dep.depend()
         if (childOb) {
+          // 将子对象的Dep和Watcher形成多对多的关系
           childOb.dep.depend()
+          
           if (Array.isArray(value)) {
+            // 如果访问的值是数组，让数组的每个元素的dep都有对应的watcher关联
             dependArray(value)
           }
         }
@@ -187,7 +207,9 @@ export function defineReactive (
       } else {
         val = newVal
       }
+      // 对重新赋值的对象也要observe一次
       childOb = !shallow && observe(newVal)
+      // 通知该dep下的所有watcher更新
       dep.notify()
     }
   })
@@ -204,6 +226,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 判断需要set的是否是数组
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
@@ -225,7 +248,9 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  // 核心还是使用了defineReactive => Object.defineProperty()
   defineReactive(ob.value, key, val)
+  // 变更通知
   ob.dep.notify()
   return val
 }
@@ -268,6 +293,7 @@ export function del (target: Array<any> | Object, key: any) {
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
     e = value[i]
+    // 让数组的每个元素的dep都有对应的watcher关联
     e && e.__ob__ && e.__ob__.dep.depend()
     if (Array.isArray(e)) {
       dependArray(e)

@@ -37,11 +37,13 @@ export function createCompilerCreator (baseCompile: Function): Function {
           }
         }
         // merge custom modules
+        // 合并自定义modules和默认modules，处理class、style、v-model
         if (options.modules) {
           finalOptions.modules =
             (baseOptions.modules || []).concat(options.modules)
         }
         // merge custom directives
+        // 合并自定义指令和默认指令
         if (options.directives) {
           finalOptions.directives = extend(
             Object.create(baseOptions.directives || null),
@@ -49,6 +51,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
           )
         }
         // copy other options
+        // 复制其它选项
         for (const key in options) {
           if (key !== 'modules' && key !== 'directives') {
             finalOptions[key] = options[key]
@@ -58,6 +61,8 @@ export function createCompilerCreator (baseCompile: Function): Function {
 
       finalOptions.warn = warn
 
+      // 执行编译的核心代码
+      // 将合并后的选项传入baseCompile方法
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         detectErrors(compiled.ast, warn)
@@ -67,6 +72,8 @@ export function createCompilerCreator (baseCompile: Function): Function {
       return compiled
     }
 
+    // compile得到渲染函数字符串
+    // 执行createCompileToFunctionFn会将渲染函数字符串 转换成真正的 渲染函数；原理其实就是new Function(code)
     return {
       compile,
       compileToFunctions: createCompileToFunctionFn(compile)

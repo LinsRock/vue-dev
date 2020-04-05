@@ -59,6 +59,8 @@ export function updateListeners (
   vm: Component
 ) {
   let name, def, cur, old, event
+  // 遍历on对象，绑定事件
+  // 可能存在on: {ev1: [handler1, handler2..], ev2: [handler3...]}
   for (name in on) {
     def = cur = on[name]
     old = oldOn[name]
@@ -80,6 +82,7 @@ export function updateListeners (
       if (isTrue(event.once)) {
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)
       }
+      // 绑定元素事件
       add(event.name, cur, event.capture, event.passive, event.params)
     } else if (cur !== old) {
       old.fns = cur

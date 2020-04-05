@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <h3>测试模板编译</h3>
+    <p v-if="isShow">compile v-if</p>
+    <ul>
+      <li v-for="(item, index) in list" :key="index">
+        {{ item }}
+      </li>
+    </ul>
+  </div>
+  
+  <script src="../../dist/vue.js"></script>
+  <script>
+
+    /* 测试响应式数据原理 */
+    const vm = new Vue({
+      el: '#app',
+      data: {
+        isShow: true,
+        list: [1,2,3,6],
+      }
+    })
+  </script>
+</body>
+</html>

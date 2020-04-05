@@ -30,6 +30,7 @@ export default class Dep {
 
   depend () {
     if (Dep.target) {
+      // 将Dep实例添加到对应的Watcher上
       Dep.target.addDep(this)
     }
   }

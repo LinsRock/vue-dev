@@ -25,6 +25,7 @@ const weexFactoryPlugin = {
   }
 }
 
+// 别名路径配置
 const aliases = require('./alias')
 const resolve = p => {
   const base = p.split('/')[0]
@@ -120,6 +121,7 @@ const builds = {
     banner
   },
   // Runtime+compiler development build (Browser)
+  // 研究完整版本打包配置，找到入口文件
   'web-full-dev': {
     entry: resolve('web/entry-runtime-with-compiler.js'),
     dest: resolve('dist/vue.js'),

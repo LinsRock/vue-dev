@@ -19,6 +19,11 @@ import {
 } from '../util/index'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
+  // 挂载了全局api有
+  // config、util
+  // set、delete、nextTick、component、directive、filter
+  // use、mixin、extend
+
   // config
   const configDef = {}
   configDef.get = () => config
@@ -45,6 +50,9 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   Vue.delete = del
   Vue.nextTick = nextTick
 
+  // ASSET_TYPES：['component', 'directive', 'filter']
+  // 在vue选项中加入这三个
+
   // 2.6 explicit observable API
   Vue.observable = <T>(obj: T): T => {
     observe(obj)
@@ -52,6 +60,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   }
 
   Vue.options = Object.create(null)
+  
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })
