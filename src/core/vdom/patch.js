@@ -228,7 +228,7 @@ export function createPatchFunction (backend) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       // 是否存在hook和init钩子
       if (isDef(i = i.hook) && isDef(i = i.init)) {
-        // 组件实例化和挂载
+        // 组件实例化和挂载，这里的i = vnode.data.hook.init，init钩子在componentVNodeHooks中定义，在init钩子中执行了组件实例化
         i(vnode, false /* hydrating */)
       }
       // after calling the init hook, if the vnode is a child component
@@ -605,7 +605,7 @@ export function createPatchFunction (backend) {
         // 新、旧节点都有子节点，子节点进行比较
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
-        // 只有新节点才有子节点，旧节点是文本节点
+        // 只有新节点才有子节点，旧节点是文本节点，新增子节点
         if (process.env.NODE_ENV !== 'production') {
           checkDuplicateKeys(ch)
         }

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <parent />
+    </div>
+  </div>
+
+  <script src="../../dist/vue.js"></script>
+  <script>
+
+    Vue.component('child', {
+      template: `
+        <div v-bind="$attrs">
+          <p>Child Component</p>
+        </div>
+      `
+    })
+
+    Vue.component('parent', {
+      data () {
+        return {
+          value: '',
+          name: 'parentName',
+          childAttr: 'params'
+        }
+      },
+      template: `
+        <div name="parentName">
+          <child attr="childAttr" />
+          <input v-model="value" placeholder="请输入" />
+        </div>
+      `
+    })
+
+
+    /* 测试$attrs 和 $listeners */
+    const vm = new Vue({
+      el: '#app',
+      data: {
+        value: ''
+      }
+    })
+  </script>
+</body>
+</html>

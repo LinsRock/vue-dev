@@ -153,6 +153,7 @@ export function defineReactive (
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
+  // 如果设置了不需要响应式处理，则退出
   if (property && property.configurable === false) {
     return
   }
